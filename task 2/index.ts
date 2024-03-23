@@ -1,15 +1,15 @@
-// Оперативная память
+// Random-Access Memory
 
 const RAM = "000b01020401030101";
 
-// Регистры процессора
+// Processors registers
 
 let instructionPointer;
 let accumulator;
 let operand_1;
 let operand_2;
 
-// Инструкции процессора
+// Processors instructions
 
 const instructions = {
   SET_A: "00",
@@ -18,7 +18,7 @@ const instructions = {
   DEC_A: "03",
 };
 
-// Виртуальная машина
+// Virtual Processor
 
 function compute() {
   for (let i = 0; i < RAM.length; ) {
@@ -66,7 +66,7 @@ function compute() {
 
 compute();
 
-// Функции инструкций
+// Processor helpers
 
 function setAccumulator(operand) {
   accumulator = parseInt(operand, 16);
