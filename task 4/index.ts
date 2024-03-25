@@ -13,73 +13,104 @@ function parseBinary(str) {
 
 // пример кодирования в BCD
 
-console.log(binary(2));
-console.log(binary(9));
-console.log(binary(7));
-console.log(binary((2 << 8) | (9 << 4) | 7));
-console.log((2 << 8) | (9 << 4) | 7);
+// console.log(binary(2));
+// console.log(binary(9));
+// console.log(binary(7));
+// console.log(binary((2 << 8) | (9 << 4) | 7));
+// console.log((2 << 8) | (9 << 4) | 7);
 
 // реализация класса
 
 class BCD {
-  private number: bigint;
-  private numbers: number[] = [];
+  private bcdCodedArray: number[] = [];
+  private originalNumber: bigint;
+  private digitCount: number;
 
   constructor(number: bigint) {
-    this.number = number;
+    this.originalNumber = number;
+    this.digitCount = 0;
+    this.initialize();
   }
 
-  valueOf(): bigint {
-    return 234n;
+  public valueOf() {
+    return this.bcdCodedArray;
+  }
+
+  public get(index) {
+    if (index < -this.digitCount || index >= this.digitCount) {
+      throw new Error(
+        `Индекс для данного числа не может быть больше ${
+          this.digitCount - 1
+        } и меньше ${-this.digitCount}`
+      );
+    }
+
+    const bcdPosition = index >= 0 ? this.digitCount - index : -index;
+
+    console.log(index);
+    console.log(bcdPosition);
+
+    const bcdArrayElementIndex = Math.floor(bcdPosition / 7);
+    const bcdInt31Position = bcdPosition % 7;
+
+    console.log(bcdArrayElementIndex);
+    console.log(bcdInt31Position);
+
+    const mask = (~0 << (32 - 4)) >>> (32 - bcdInt31Position * 4);
+    const intersection = this.bcdCodedArray[bcdArrayElementIndex] & mask;
+    const result = intersection >>> (4 * (bcdInt31Position - 1));
+
+    return result;
+  }
+
+  private initialize(): void {
+    let processedNumber = Number(this.originalNumber);
+    let bcd31bitCollection = 0;
+    let bcdPosition = 0;
+
+    while (processedNumber > 0) {
+      let rightmostDigit = this.getRightmostDigit(processedNumber);
+
+      bcd31bitCollection = this.addToCollection(
+        bcd31bitCollection,
+        bcdPosition,
+        rightmostDigit
+      );
+
+      processedNumber = this.removeRightmostNumber(processedNumber);
+
+      bcdPosition++;
+      this.digitCount++;
+
+      if (bcdPosition % 7 === 0) {
+        this.bcdCodedArray.push(bcd31bitCollection);
+        bcd31bitCollection = 0;
+        bcdPosition = 0;
+      }
+
+      if (processedNumber === 0) {
+        this.bcdCodedArray.push(bcd31bitCollection);
+      }
+    }
+  }
+
+  private getRightmostDigit(number: number): number {
+    return number % 10;
+  }
+
+  private addToCollection(
+    collection: number,
+    position: number,
+    bcdToAdd: number
+  ): number {
+    return collection | (bcdToAdd << (0 + 4 * position));
+  }
+
+  private removeRightmostNumber(number: number): number {
+    return Math.floor(number / 10);
   }
 }
 
-const test = new BCD(12n);
+const n = new BCD(123456789n);
 
-console.log(test.valueOf());
-
-let num = 1212121212;
-let numbers: number[] = [];
-let bcdCollection31bit = 0;
-let bcdPosition = 0;
-
-while (num > 0) {
-  let rightmostDigit = getRightmostDigit(num);
-
-  bcdCollection31bit = addToCollection(
-    bcdCollection31bit,
-    bcdPosition,
-    rightmostDigit
-  );
-
-  num = removeRightmostNumber(num);
-  bcdPosition++;
-
-  if (bcdPosition % 7 === 0) {
-    numbers.push(bcdCollection31bit);
-    bcdCollection31bit = 0;
-    bcdPosition = 0;
-  }
-
-  if (num === 0) {
-    numbers.push(bcdCollection31bit);
-  }
-}
-
-function getRightmostDigit(number) {
-  return number % 10;
-}
-
-function addToCollection(collection, position, bcdToAdd) {
-  return collection | (bcdToAdd << (0 + 4 * position));
-}
-
-function removeRightmostNumber(number) {
-  return Math.floor(number / 10);
-}
-
-console.log(numbers);
-
-console.log(binary(numbers[0]));
-console.log(binary(numbers[1]));
-console.log(binary(numbers[2]));
+console.log(n.get(2));
