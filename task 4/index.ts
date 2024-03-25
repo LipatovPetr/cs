@@ -24,11 +24,11 @@ function parseBinary(str) {
 class BCD {
   private bcdCodedArray: number[] = [];
   private originalNumber: bigint;
-  private digitCount: number;
+  private maxIndex: number;
 
   constructor(number: bigint) {
     this.originalNumber = number;
-    this.digitCount = 0;
+    this.maxIndex = -1;
     this.initialize();
   }
 
@@ -37,28 +37,21 @@ class BCD {
   }
 
   public get(index) {
-    if (index < -this.digitCount || index >= this.digitCount) {
+    if (index < -this.maxIndex - 1 || index > this.maxIndex) {
       throw new Error(
         `Индекс для данного числа не может быть больше ${
-          this.digitCount - 1
-        } и меньше ${-this.digitCount}`
+          this.maxIndex
+        } и меньше ${-this.maxIndex - 1}`
       );
     }
 
-    const bcdPosition = index >= 0 ? this.digitCount - index : -index;
+    const reversedIndex = index >= 0 ? this.maxIndex - index : -index - 1;
+    const bcdArrayIndex = Math.floor(reversedIndex / 7);
+    const bcdInt31Index = reversedIndex % 7;
 
-    console.log(index);
-    console.log(bcdPosition);
-
-    const bcdArrayElementIndex = Math.floor(bcdPosition / 7);
-    const bcdInt31Position = bcdPosition % 7;
-
-    console.log(bcdArrayElementIndex);
-    console.log(bcdInt31Position);
-
-    const mask = (~0 << (32 - 4)) >>> (32 - bcdInt31Position * 4);
-    const intersection = this.bcdCodedArray[bcdArrayElementIndex] & mask;
-    const result = intersection >>> (4 * (bcdInt31Position - 1));
+    const mask = (~0 << (32 - 4)) >>> (32 - (bcdInt31Index + 1) * 4);
+    const intersection = this.bcdCodedArray[bcdArrayIndex] & mask;
+    const result = intersection >>> (4 * bcdInt31Index);
 
     return result;
   }
@@ -80,7 +73,7 @@ class BCD {
       processedNumber = this.removeRightmostNumber(processedNumber);
 
       bcdPosition++;
-      this.digitCount++;
+      this.maxIndex++;
 
       if (bcdPosition % 7 === 0) {
         this.bcdCodedArray.push(bcd31bitCollection);
@@ -93,11 +86,9 @@ class BCD {
       }
     }
   }
-
   private getRightmostDigit(number: number): number {
     return number % 10;
   }
-
   private addToCollection(
     collection: number,
     position: number,
@@ -105,12 +96,9 @@ class BCD {
   ): number {
     return collection | (bcdToAdd << (0 + 4 * position));
   }
-
   private removeRightmostNumber(number: number): number {
     return Math.floor(number / 10);
   }
 }
-
 const n = new BCD(123456789n);
-
-console.log(n.get(2));
+console.log(n.get(0));
