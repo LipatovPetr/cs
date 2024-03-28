@@ -5,19 +5,11 @@ function binary(num) {
   return "0b" + str.padStart(32, "0").replace(/(.{4})(?!$)/g, "$1_");
 }
 
-// преобразование в число
+//  преобразование в число
 
 function parseBinary(str) {
   return parseInt(str.replace(/^0b|_/g, ""), 2) >> 0;
 }
-
-// пример кодирования в BCD
-
-// console.log(binary(2));
-// console.log(binary(9));
-// console.log(binary(7));
-// console.log(binary((2 << 8) | (9 << 4) | 7));
-// console.log((2 << 8) | (9 << 4) | 7);
 
 // реализация класса
 
@@ -33,7 +25,13 @@ class BCD {
   }
 
   public valueOf() {
-    return this.bcdCodedArray;
+    const bigint1 = BigInt(this.bcdCodedArray[0]);
+    const bigint2 = BigInt(this.bcdCodedArray[1]);
+
+    console.log(bigint1);
+    console.log(bigint2);
+
+    return binary(2);
   }
 
   public get(index) {
@@ -45,15 +43,23 @@ class BCD {
       );
     }
 
-    const reversedIndex = index >= 0 ? this.maxIndex - index : -index - 1;
-    const bcdArrayIndex = Math.floor(reversedIndex / 7);
-    const bcdInt31Index = reversedIndex % 7;
+    const bcdFullReversedIndex =
+      index >= 0 ? this.maxIndex - index : -index - 1;
+    const bcdContainerReversedIndex = Math.floor(bcdFullReversedIndex / 7);
+    const bcdReversedIndex = bcdFullReversedIndex % 7;
 
-    const mask = (~0 << (32 - 4)) >>> (32 - (bcdInt31Index + 1) * 4);
-    const intersection = this.bcdCodedArray[bcdArrayIndex] & mask;
-    const result = intersection >>> (4 * bcdInt31Index);
+    const mask = this.createMask(4, bcdReversedIndex);
+    const intersection = this.bcdCodedArray[bcdContainerReversedIndex] & mask;
+    const result = intersection >>> (4 * bcdReversedIndex);
 
     return result;
+  }
+
+  private createMask(len, bcdReversedIndex) {
+    let r = ~0;
+    r <<= 32 - len;
+    r >>>= 32 - (bcdReversedIndex + 1) * 4;
+    return r;
   }
 
   private initialize(): void {
@@ -86,6 +92,7 @@ class BCD {
       }
     }
   }
+
   private getRightmostDigit(number: number): number {
     return number % 10;
   }
@@ -101,4 +108,5 @@ class BCD {
   }
 }
 const n = new BCD(123456789n);
-console.log(n.get(0));
+console.log(n.valueOf());
+console.log(n.get(-4));
