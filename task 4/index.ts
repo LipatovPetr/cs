@@ -5,7 +5,7 @@ function binary(num) {
   return "0b" + str.padStart(32, "0").replace(/(.{4})(?!$)/g, "$1_");
 }
 
-function binaryBiging(num) {
+function binaryBigint(num) {
   const str = new BigInt64Array([num])[0].toString(2);
   return "0b" + str.padStart(64, "0").replace(/(.{4})(?!$)/g, "$1_");
 }
@@ -30,18 +30,15 @@ class BCD {
   }
 
   public valueOf() {
-    // const reversedBcdCodedArray = this.bcdCodedArray.reverse();
     let r = BigInt(0);
 
     for (let i = 0; i < this.bcdCodedArray.length; i++) {
       const bcdInt31Container = BigInt(this.bcdCodedArray[i]);
       const offset = 32 * i;
       const bcdInt31ContainerWithOffset = bcdInt31Container << BigInt(offset);
-
       r |= bcdInt31ContainerWithOffset;
     }
-
-    return console.log(binaryBiging(r));
+    return r;
   }
 
   public get(index) {
@@ -118,10 +115,5 @@ class BCD {
 }
 const n = new BCD(123456789n);
 
-console.log(n.valueOf());
-console.log(n.get(1));
-
-console.log(binary(1));
-console.log(binary(2));
-console.log(binary(3));
-console.log(binary(4));
+console.log(binaryBigint(n.valueOf()));
+console.log(n.get(-4));
