@@ -5,6 +5,11 @@ function binary(num) {
   return "0b" + str.padStart(32, "0").replace(/(.{4})(?!$)/g, "$1_");
 }
 
+function binaryBiging(num) {
+  const str = new BigInt64Array([num])[0].toString(2);
+  return "0b" + str.padStart(64, "0").replace(/(.{4})(?!$)/g, "$1_");
+}
+
 //  преобразование в число
 
 function parseBinary(str) {
@@ -25,13 +30,18 @@ class BCD {
   }
 
   public valueOf() {
-    const bigint1 = BigInt(this.bcdCodedArray[0]);
-    const bigint2 = BigInt(this.bcdCodedArray[1]);
+    // const reversedBcdCodedArray = this.bcdCodedArray.reverse();
+    let r = BigInt(0);
 
-    console.log(bigint1);
-    console.log(bigint2);
+    for (let i = 0; i < this.bcdCodedArray.length; i++) {
+      const bcdInt31Container = BigInt(this.bcdCodedArray[i]);
+      const offset = 32 * i;
+      const bcdInt31ContainerWithOffset = bcdInt31Container << BigInt(offset);
 
-    return binary(2);
+      r |= bcdInt31ContainerWithOffset;
+    }
+
+    return console.log(binaryBiging(r));
   }
 
   public get(index) {
@@ -43,22 +53,21 @@ class BCD {
       );
     }
 
-    const bcdFullReversedIndex =
-      index >= 0 ? this.maxIndex - index : -index - 1;
-    const bcdContainerReversedIndex = Math.floor(bcdFullReversedIndex / 7);
-    const bcdReversedIndex = bcdFullReversedIndex % 7;
+    const digitReversedIndex = index >= 0 ? this.maxIndex - index : -index - 1;
+    const bcdContainerReversedIndex = Math.floor(digitReversedIndex / 7);
+    const bcdValueReversedIndex = digitReversedIndex % 7;
 
-    const mask = this.createMask(4, bcdReversedIndex);
+    const mask = this.createMask(bcdValueReversedIndex);
     const intersection = this.bcdCodedArray[bcdContainerReversedIndex] & mask;
-    const result = intersection >>> (4 * bcdReversedIndex);
+    const result = intersection >>> (4 * bcdValueReversedIndex);
 
     return result;
   }
 
-  private createMask(len, bcdReversedIndex) {
+  private createMask(bcdValueReversedIndex) {
     let r = ~0;
-    r <<= 32 - len;
-    r >>>= 32 - (bcdReversedIndex + 1) * 4;
+    r <<= 32 - 4;
+    r >>>= 32 - (bcdValueReversedIndex + 1) * 4;
     return r;
   }
 
@@ -108,5 +117,11 @@ class BCD {
   }
 }
 const n = new BCD(123456789n);
+
 console.log(n.valueOf());
-console.log(n.get(-4));
+console.log(n.get(1));
+
+console.log(binary(1));
+console.log(binary(2));
+console.log(binary(3));
+console.log(binary(4));
