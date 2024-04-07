@@ -100,6 +100,22 @@ class DoublyLinkedList {
       current = current.next;
     }
   }
+
+  [Symbol.iterator]() {
+    let currentNode = this.head;
+
+    return {
+      next() {
+        if (!currentNode) return { value: undefined, done: true };
+        const returnValue = {
+          value: currentNode.value,
+          done: false,
+        };
+        currentNode = currentNode.next;
+        return returnValue;
+      },
+    };
+  }
 }
 
 const DLL = new DoublyLinkedList();
@@ -109,4 +125,6 @@ DLL.addToTail(2);
 DLL.addToTail(3);
 DLL.addToTail(4);
 
-DLL.display();
+for (const value of DLL) {
+  console.log("value:", value);
+}
