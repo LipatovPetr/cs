@@ -96,15 +96,16 @@ class Matrix<T extends ArrayBufferView> {
   }
 
   public getIndex(...args): number {
-    this.validateCoordinates(args);
+    this.validateArgumentsLength(args);
+    this.validateDimensions(args);
 
     let index = 0;
 
     for (let i = 0; i < args.length; i++) {
       const currentElement = args[i];
-      const elementsToTheLeft = this.dimensions.slice(i + 1);
+      const elementsToTheLeftFromCurrent = this.dimensions.slice(i + 1);
 
-      const elementsToTheLeftMultiplied = elementsToTheLeft.reduce(
+      const elementsToTheLeftMultiplied = elementsToTheLeftFromCurrent.reduce(
         (accumulator, currentValue) => accumulator * currentValue,
         1
       );
@@ -115,7 +116,19 @@ class Matrix<T extends ArrayBufferView> {
     return index;
   }
 
-  private validateCoordinates(args: number[]): void {
+  public set(...args) {
+    const coordinats = args.slice(0, args.length - 1);
+    const value = args.pop();
+
+    this.validateArgumentsLength(coordinats);
+    this.validateDimensions(coordinats);
+
+    const index = this.getIndex(...coordinats);
+
+    return (this.buffer[index] = value);
+  }
+
+  private validateArgumentsLength(args: number[]): void {
     if (args.length < this.dimensions.length) {
       throw new RangeError("Too few arguments provided to the function");
     }
@@ -123,12 +136,26 @@ class Matrix<T extends ArrayBufferView> {
       throw new RangeError("Too many arguments provided to the function");
     }
   }
+
+  private validateDimensions(args) {
+    for (let i = 0; i < this.dimensions.length; i++) {
+      if (this.dimensions[i] - 1 < args[i]) {
+        throw new RangeError(
+          `Coordinates are out of bounds of the matrix (index: ${i}, value:  ${args[i]})`
+        );
+      }
+    }
+  }
 }
 
-// Пример использования
-const matrix3n4n5 = new Matrix(Int32Array, 3, 3, 3, 3); // Создание матрицы 3x4x5 типа Int32Array
+const matrix = new Matrix(Int32Array, 2, 3, 3);
 
-console.log(matrix3n4n5.getBuffer());
-console.log(matrix3n4n5.getByteLength());
-console.log(matrix3n4n5.getDimentions());
-console.log(matrix3n4n5.getIndex(2, 2, 2, 2));
+console.log(matrix.getBuffer());
+console.log(matrix.set(1, 2, 2, 6));
+console.log(matrix.set(1, 2, 1, 5));
+console.log(matrix.set(1, 2, 0, 4));
+console.log(matrix.set(1, 1, 2, 3));
+console.log(matrix.set(1, 1, 1, 2));
+console.log(matrix.set(1, 1, 0, 1));
+
+console.log(matrix.getBuffer());
