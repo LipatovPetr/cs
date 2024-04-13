@@ -74,6 +74,7 @@ const vec = new Vector(Uint8Array, { capacity: 8 });
 
 // Matrix
 class Matrix<T extends ArrayBufferView> {
+  public length: number;
   private dimensions: number[];
   private buffer: T;
 
@@ -81,6 +82,7 @@ class Matrix<T extends ArrayBufferView> {
     this.dimensions = dimensions;
     const totalLength = dimensions.reduce((acc, cur) => acc * cur, 1);
     this.buffer = new arrayType(totalLength);
+    this.length = totalLength;
   }
 
   public getBuffer(): T {
@@ -146,6 +148,12 @@ class Matrix<T extends ArrayBufferView> {
       }
     }
   }
+
+  *values() {
+    for (let i = 0; i < this.length; i++) {
+      yield this.buffer[i];
+    }
+  }
 }
 
 const matrix = new Matrix(Int32Array, 2, 3, 3);
@@ -159,3 +167,9 @@ console.log(matrix.set(1, 1, 1, 2));
 console.log(matrix.set(1, 1, 0, 1));
 
 console.log(matrix.getBuffer());
+
+let j = matrix.values();
+
+for (let i = 0; i < matrix.length; i++) {
+  console.log(j.next());
+}
