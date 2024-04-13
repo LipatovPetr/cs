@@ -1,3 +1,5 @@
+// Vector
+
 class Vector<T extends ArrayBufferView> {
   private capacity: number;
   private length: number;
@@ -70,33 +72,63 @@ class Vector<T extends ArrayBufferView> {
 
 const vec = new Vector(Uint8Array, { capacity: 8 });
 
-vec.push(1);
-vec.push(2);
-vec.push(3);
-vec.push(4);
-vec.push(5);
-vec.push(6);
+// Matrix
+class Matrix<T extends ArrayBufferView> {
+  private dimensions: number[];
+  private buffer: T;
 
-console.log(vec.getLength());
-console.log(vec.getCapacity());
+  constructor(arrayType: new (length: number) => T, ...dimensions: number[]) {
+    this.dimensions = dimensions;
+    const totalLength = dimensions.reduce((acc, cur) => acc * cur, 1);
+    this.buffer = new arrayType(totalLength);
+  }
 
-console.log(vec.getLength());
-console.log(vec.getCapacity());
-console.log(vec.getByteLength());
+  public getBuffer(): T {
+    return this.buffer;
+  }
 
-vec.shrinkToFit();
+  public getByteLength(): number {
+    return this.buffer.byteLength;
+  }
 
-console.log(vec.getLength());
-console.log(vec.getCapacity());
-console.log(vec.getByteLength());
+  public getDimentions(): number[] {
+    return this.dimensions;
+  }
 
-const i = vec.values();
+  public getIndex(...args): number {
+    this.validateCoordinates(args);
 
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
-console.log(i.next());
+    let index = 0;
+
+    for (let i = 0; i < args.length; i++) {
+      const currentElement = args[i];
+      const elementsToTheLeft = this.dimensions.slice(i + 1);
+
+      const elementsToTheLeftMultiplied = elementsToTheLeft.reduce(
+        (accumulator, currentValue) => accumulator * currentValue,
+        1
+      );
+
+      index += currentElement * elementsToTheLeftMultiplied;
+    }
+
+    return index;
+  }
+
+  private validateCoordinates(args: number[]): void {
+    if (args.length < this.dimensions.length) {
+      throw new RangeError("Too few arguments provided to the function");
+    }
+    if (args.length > this.dimensions.length) {
+      throw new RangeError("Too many arguments provided to the function");
+    }
+  }
+}
+
+// Пример использования
+const matrix3n4n5 = new Matrix(Int32Array, 3, 3, 3, 3); // Создание матрицы 3x4x5 типа Int32Array
+
+console.log(matrix3n4n5.getBuffer());
+console.log(matrix3n4n5.getByteLength());
+console.log(matrix3n4n5.getDimentions());
+console.log(matrix3n4n5.getIndex(2, 2, 2, 2));
