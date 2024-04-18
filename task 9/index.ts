@@ -49,238 +49,327 @@ class ListNode<T> {
   }
 }
 
-// class LinkedList<T> {
-//   first: ListNode<T> | null = null;
-//   last: ListNode<T> | null = null;
+class LinkedList<T> {
+  public head: ListNode<T> | null = null;
+  public tail: ListNode<T> | null = null;
 
-//   [Symbol.iterator]() {
-//     return this.values();
-//   }
+  private size: number;
 
-//   pushLeft(value: T) {
-//     const { first } = this;
-//     this.first = new ListNode(value, { next: first });
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.size = 0;
+  }
 
-//     if (this.last == null) {
-//       this.last = this.first;
-//     }
-//   }
+  public length(): number {
+    return this.size;
+  }
 
-//   popLeft() {
-//     const { first } = this;
+  public isEmpty(): boolean {
+    return this.size <= 0;
+  }
 
-//     if (first == null || first === this.last) {
-//       this.first = null;
-//       this.last = null;
-//     } else {
-//       this.first = first.next;
-//       this.first!.prev = null;
-//     }
+  public getHead(): T {
+    if (this.head) {
+      return this.head.value;
+    } else {
+      throw new RangeError("Nothing to display, current List is empty");
+    }
+  }
 
-//     return first?.value;
-//   }
+  public getTail(): T {
+    if (this.tail) {
+      return this.tail.value;
+    } else {
+      throw new RangeError("Nothing to display, current List is empty");
+    }
+  }
 
-//   pushRight(value: T) {
-//     const { last } = this;
-//     this.last = new ListNode(value, { prev: last });
+  public addToHead(value: any) {
+    if (this.isEmpty()) {
+      // if list is empty:
+      // create a node,
+      // and set it as a head and a tail of the Linked List,
+      // increase list size by 1
+      let tmp = new ListNode<T>(value, {});
+      this.head = tmp;
+      this.tail = tmp;
+      this.size++;
+    } else {
+      // if list is not empty: create a node,
+      // pass it { next: this.head }
+      // set it as this.head
+      let tmp = new ListNode<T>(value, { next: this.head });
+      this.head = tmp;
+      this.size++;
+    }
+  }
 
-//     if (this.first == null) {
-//       this.first = this.last;
-//     }
-//   }
+  public addToTail(value: T) {
+    if (this.isEmpty()) {
+      this.addToHead(value);
+    } else {
+      let tmp = new ListNode<T>(value, { prev: this.tail });
+      this.tail = tmp;
+      this.size++;
+    }
+  }
 
-//   popRight() {
-//     const { last } = this;
+  public removeHead() {
+    const { head } = this;
 
-//     if (last == null || last === this.first) {
-//       this.first = null;
-//       this.last = null;
-//     } else {
-//       this.last = last.prev;
-//       this.last!.next = null;
-//     }
+    if (head == null || head === this.tail) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.head = head.next;
+      this.head!.prev = null;
+    }
 
-//     return last?.value;
-//   }
+    return head?.value;
+  }
 
-//   *values() {
-//     let node = this.first;
+  public removeTail() {
+    const { tail } = this;
 
-//     while (node != null) {
-//       yield node.value;
-//       node = node.next;
-//     }
-//   }
+    if (tail == null || tail === this.head) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.tail = tail.prev;
+      this.tail!.next = null;
+    }
 
-//   *reversedValues() {
-//     let node = this.last;
+    return tail?.value;
+  }
 
-//     while (node != null) {
-//       yield node.value;
-//       node = node.prev;
-//     }
-//   }
-// }
+  display(): void {
+    if (this.isEmpty()) {
+      throw new RangeError("Nothing to display, current List is empty");
+    }
 
-// class Dequeue<T extends QueueTypes> {
-//   length: number = 0;
-//   readonly capacity: number;
-//   readonly TypedArray: TypedArray<T>;
+    let current = this.head;
 
-//   list: LinkedList<T>;
-//   firstIndex: number | null = null;
-//   lastIndex: number | null = null;
+    while (current) {
+      console.log(current);
+      current = current.next;
+    }
+  }
 
-//   get first():
-//     | (T extends BigUint64Array | BigInt64Array ? bigint : number)
-//     | undefined {
-//     if (this.firstIndex == null) {
-//       return undefined;
-//     }
+  [Symbol.iterator]() {
+    let currentNode = this.head;
 
-//     return this.list.first!.value[this.firstIndex] as any;
-//   }
+    return {
+      next() {
+        if (!currentNode) return { value: undefined, done: true };
+        const returnValue = {
+          value: currentNode.value,
+          done: false,
+        };
+        currentNode = currentNode.next;
+        return returnValue;
+      },
+    };
+  }
+}
 
-//   get last():
-//     | (T extends BigUint64Array | BigInt64Array ? bigint : number)
-//     | undefined {
-//     if (this.lastIndex == null) {
-//       return undefined;
-//     }
+class Dequeue<T extends QueueTypes> {
+  length: number = 0;
+  readonly capacity: number;
+  readonly TypedArray: TypedArray<T>;
 
-//     return this.list.last!.value[this.lastIndex] as any;
-//   }
+  list: LinkedList<T>;
+  firstIndex: number | null = null;
+  lastIndex: number | null = null;
 
-//   constructor(TypedArray: TypedArray<T>, capacity: number) {
-//     if (capacity <= 0 || capacity % 1 != 0) {
-//       throw new TypeError("The capacity can only be a positive integer");
-//     }
+  get first():
+    | (T extends BigUint64Array | BigInt64Array ? bigint : number)
+    | undefined {
+    if (this.firstIndex == null) {
+      return undefined;
+    }
 
-//     this.capacity = capacity;
-//     this.TypedArray = TypedArray;
+    // we address linked-list head.value
+    // which is a TypedArray
+    // so to get the value, we also specify an Index for TypedArray [this.firstIndex]
 
-//     this.list = new LinkedList<T>();
-//     this.list.pushLeft(new TypedArray(capacity));
-//   }
+    return this.list.head!.value[this.firstIndex] as any;
+  }
 
-//   pushLeft(value: T extends BigUint64Array | BigInt64Array ? bigint : number) {
-//     this.length++;
-//     let { firstIndex } = this;
+  get last():
+    | (T extends BigUint64Array | BigInt64Array ? bigint : number)
+    | undefined {
+    if (this.lastIndex == null) {
+      return undefined;
+    }
 
-//     if (firstIndex == null) {
-//       firstIndex = Math.floor(this.capacity / 2);
-//     } else {
-//       firstIndex--;
+    // we address linked-list tail.value
+    // which is a TypedArray
+    // so to get the value, we also specify an Index for TypedArray [this.lastIndex]
 
-//       if (firstIndex < 0) {
-//         firstIndex = this.capacity - 1;
-//         this.list.pushLeft(new this.TypedArray(this.capacity));
-//       }
-//     }
+    return this.list.tail!.value[this.lastIndex] as any;
+  }
 
-//     this.firstIndex = firstIndex;
-//     this.list.first!.value[firstIndex] = value;
+  // in constructor we pass TypedArray type and its capacity
+  // constructor creates Linked-List
+  // and sets TypedArray as the Head of the Linked-List
 
-//     if (this.lastIndex == null) {
-//       this.lastIndex = this.firstIndex;
-//     }
+  constructor(TypedArray: TypedArray<T>, capacity: number) {
+    if (capacity <= 0 || capacity % 1 != 0) {
+      throw new TypeError("The capacity can only be a positive integer");
+    }
 
-//     return this.length;
-//   }
+    this.capacity = capacity;
+    this.TypedArray = TypedArray;
 
-//   popLeft():
-//     | (T extends BigUint64Array | BigInt64Array ? bigint : number)
-//     | undefined {
-//     let { firstIndex } = this;
+    this.list = new LinkedList<T>();
+    this.list.addToHead(new TypedArray(capacity));
+  }
 
-//     if (firstIndex == null) {
-//       return undefined;
-//     }
+  pushLeft(value: T extends BigUint64Array | BigInt64Array ? bigint : number) {
+    this.length++;
+    let { firstIndex } = this;
 
-//     this.length--;
-//     const value = this.list.first!.value[firstIndex];
+    // if first index does not exist,
+    // that means we will initialise firstIndex as the middle of the initial array
+    // firstIndex = Math.floor(this.capacity / 2);
 
-//     // null <- [_, _, _, _, _, _, _]
+    if (firstIndex == null) {
+      firstIndex = Math.floor(this.capacity / 2);
+    } else {
+      // If the first index exists, decrement it.
 
-//     if (firstIndex === this.lastIndex && this.list.first === this.list.last) {
-//       this.firstIndex = null;
-//       this.lastIndex = null;
-//     } else {
-//       firstIndex++;
+      firstIndex--;
 
-//       if (firstIndex >= this.capacity) {
-//         firstIndex = 0;
-//         this.list.popLeft();
-//       }
+      // Then check if the decremented value is less than 0.
+      // if firstIndex < 0 == true, it means the array has no free space from the Left
+      // and we have to create a new array in nee Linked-List node, but in this case
+      // firstIndex will be this.capacity - 1 and not Math.floor(this.capacity / 2)
 
-//       this.firstIndex = firstIndex;
+      if (firstIndex < 0) {
+        firstIndex = this.capacity - 1;
+        this.list.addToHead(new this.TypedArray(this.capacity));
+      }
+    }
 
-//       if (firstIndex > this.lastIndex! && this.list.first === this.list.last) {
-//         // FIXME ставить в середину
-//         this.lastIndex = firstIndex;
-//       }
-//     }
+    // If firstIndex < 0 evaluates to false, it means the array has available space on the Left.
+    // we set this.firstIndex = firstIndex;
+    // address array in the head.value of the LinkedList, select element by the index [firstIndex]
+    // and assign value to that
 
-//     return value as any;
-//   }
+    this.firstIndex = firstIndex;
+    this.list.head!.value[firstIndex] = value;
 
-//   pushRight(value: T extends BigUint64Array | BigInt64Array ? bigint : number) {
-//     this.length++;
-//     let { lastIndex } = this;
+    if (this.lastIndex == null) {
+      this.lastIndex = this.firstIndex;
+    }
 
-//     if (lastIndex == null) {
-//       lastIndex = Math.floor(this.capacity / 2);
-//     } else {
-//       lastIndex++;
+    return this.length;
+  }
 
-//       if (lastIndex >= this.capacity) {
-//         lastIndex = 0;
-//         this.list.pushRight(new this.TypedArray(this.capacity));
-//       }
-//     }
+  popLeft():
+    | (T extends BigUint64Array | BigInt64Array ? bigint : number)
+    | undefined {
+    let { firstIndex } = this;
 
-//     this.lastIndex = lastIndex;
-//     this.list.last!.value[lastIndex] = value;
+    if (firstIndex == null) {
+      return undefined;
+    }
 
-//     if (this.firstIndex == null) {
-//       this.firstIndex = this.lastIndex;
-//     }
+    this.length--;
+    const value = this.list.head!.value[firstIndex];
 
-//     return this.length;
-//   }
+    // null <- [_, _, _, _, _, _, _]
 
-//   popRight():
-//     | (T extends BigUint64Array | BigInt64Array ? bigint : number)
-//     | undefined {
-//     let { lastIndex } = this;
+    if (firstIndex === this.lastIndex && this.list.head === this.list.tail) {
+      this.firstIndex = null;
+      this.lastIndex = null;
+    } else {
+      firstIndex++;
 
-//     if (lastIndex == null) {
-//       return undefined;
-//     }
+      if (firstIndex >= this.capacity) {
+        firstIndex = 0;
+        this.list.removeHead();
+      }
 
-//     this.length--;
-//     const value = this.list.last!.value[lastIndex];
+      this.firstIndex = firstIndex;
 
-//     if (lastIndex === this.firstIndex && this.list.first === this.list.last) {
-//       this.firstIndex = null;
-//       this.lastIndex = null;
-//     } else {
-//       lastIndex--;
+      if (firstIndex > this.lastIndex! && this.list.head === this.list.tail) {
+        // FIXME ставить в середину
+        this.lastIndex = firstIndex;
+      }
+    }
 
-//       if (lastIndex < 0) {
-//         lastIndex = this.capacity - 1;
-//         this.list.popRight();
-//       }
+    return value as any;
+  }
 
-//       this.lastIndex = lastIndex;
+  pushRight(value: T extends BigUint64Array | BigInt64Array ? bigint : number) {
+    this.length++;
+    let { lastIndex } = this;
 
-//       if (lastIndex < this.firstIndex! && this.list.first === this.list.last) {
-//         this.firstIndex = lastIndex;
-//       }
-//     }
+    if (lastIndex == null) {
+      lastIndex = Math.floor(this.capacity / 2);
+    } else {
+      lastIndex++;
 
-//     return value as any;
-//   }
-// }
+      if (lastIndex >= this.capacity) {
+        lastIndex = 0;
+        this.list.addToTail(new this.TypedArray(this.capacity));
+      }
+    }
 
-// const dequeue = new Dequeue(Uint8Array, 64);
+    this.lastIndex = lastIndex;
+    this.list.tail!.value[lastIndex] = value;
+
+    if (this.firstIndex == null) {
+      this.firstIndex = this.lastIndex;
+    }
+
+    return this.length;
+  }
+
+  popRight():
+    | (T extends BigUint64Array | BigInt64Array ? bigint : number)
+    | undefined {
+    let { lastIndex } = this;
+
+    if (lastIndex == null) {
+      return undefined;
+    }
+
+    this.length--;
+    const value = this.list.tail!.value[lastIndex];
+
+    if (lastIndex === this.firstIndex && this.list.head === this.list.tail) {
+      this.firstIndex = null;
+      this.lastIndex = null;
+    } else {
+      lastIndex--;
+
+      if (lastIndex < 0) {
+        lastIndex = this.capacity - 1;
+        this.list.removeTail();
+      }
+
+      this.lastIndex = lastIndex;
+
+      if (lastIndex < this.firstIndex! && this.list.head === this.list.tail) {
+        this.firstIndex = lastIndex;
+      }
+    }
+
+    return value as any;
+  }
+}
+
+const dequeue = new Dequeue(Uint8Array, 8);
+
+console.log(dequeue.capacity);
+console.log(dequeue.TypedArray);
+console.log(dequeue.list);
+
+console.log(dequeue.pushLeft(1));
+console.log(dequeue.pushLeft(3));
+console.log(dequeue.pushLeft(2));
+
+console.log(dequeue.list);
