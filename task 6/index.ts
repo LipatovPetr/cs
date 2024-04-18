@@ -1,14 +1,42 @@
 //  Doubly Linked List  (DLL)
 
-class DoublyLinkedListNode {
-  public value: any;
-  public next: null | DoublyLinkedListNode;
-  public prev: null | DoublyLinkedListNode;
+class ListNode<T> {
+  public value: T;
+  public next: ListNode<T> | null = null;
+  public prev: ListNode<T> | null = null;
+
+  constructor(
+    value: T,
+    {
+      next = null,
+      prev = null,
+    }: { prev?: ListNode<T> | null; next?: ListNode<T> | null }
+  ) {
+    this.value = value;
+
+    // if prev is passed then
+    // it is set as this.prev
+    // but also prev.next is set to THIS node
+
+    if (prev !== null) {
+      this.prev = prev;
+      prev.next = this;
+    }
+
+    // if next is passed then
+    // it is set as this.next
+    // but also next.prev is set to THIS node
+
+    if (next !== null) {
+      this.next = next;
+      next.prev = this;
+    }
+  }
 }
 
-class DoublyLinkedList {
-  private head: null | DoublyLinkedListNode;
-  private tail: null | DoublyLinkedListNode;
+class LinkedList<T> {
+  private head: ListNode<T> | null = null;
+  private tail: ListNode<T> | null = null;
 
   private size: number;
 
@@ -26,7 +54,7 @@ class DoublyLinkedList {
     return this.size <= 0;
   }
 
-  public getHead(): number {
+  public getHead(): T {
     if (this.head) {
       return this.head.value;
     } else {
@@ -34,7 +62,7 @@ class DoublyLinkedList {
     }
   }
 
-  public getTail(): number {
+  public getTail(): T {
     if (this.tail) {
       return this.tail.value;
     } else {
@@ -46,43 +74,29 @@ class DoublyLinkedList {
     if (this.isEmpty()) {
       // if list is empty:
       // create a node,
-      // and set it as a head and a tail,
+      // and set it as a head and a tail of the Linked List,
       // increase list size by 1
-      let tmp = new DoublyLinkedListNode();
-      tmp.value = value;
+      let tmp = new ListNode<T>(value, {});
       this.head = tmp;
       this.tail = tmp;
       this.size++;
     } else {
       // if list is not empty: create a node,
-      // set current head node as its 'next' node,
-      // set prev as null, bc we are adding to the head
-      let tmp = new DoublyLinkedListNode();
-      tmp.next = this.head;
-      tmp.prev = null;
-      tmp.value = value;
-
-      // also we have to update node that used to be the head,
-      // and current link head variable as well:
-      // set current head prev as new temp node,
-      // set this.head as new node
-
-      this.head!.prev = tmp;
+      // pass it { next: this.head }
+      // set it as this.head
+      let tmp = new ListNode<T>(value, { next: this.head });
       this.head = tmp;
       this.size++;
     }
   }
 
-  public addToTail(value: any) {
+  public addToTail(value: T) {
     if (this.isEmpty()) {
       this.addToHead(value);
     } else {
-      let tmp = new DoublyLinkedListNode();
-      tmp.value = value;
-      tmp.prev = this.tail;
+      let tmp = new ListNode<T>(value, { prev: this.tail });
 
       this.tail!.next = tmp;
-
       this.tail = tmp;
       this.size++;
     }
@@ -118,7 +132,7 @@ class DoublyLinkedList {
   }
 }
 
-const DLL = new DoublyLinkedList();
+const DLL = new LinkedList<number>();
 
 DLL.addToTail(1);
 DLL.addToTail(2);

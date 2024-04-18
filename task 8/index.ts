@@ -78,11 +78,10 @@ class Matrix<T extends ArrayBufferView> {
   private dimensions: number[];
   private buffer: T;
 
-  constructor(arrayType: new (length: number) => T, ...dimensions: number[]) {
+  constructor(arrayType: new (len: number) => T, ...dimensions: number[]) {
     this.dimensions = dimensions;
-    const totalLength = dimensions.reduce((acc, cur) => acc * cur, 1);
-    this.buffer = new arrayType(totalLength);
-    this.length = totalLength;
+    this.length = dimensions.reduce((acc, cur) => acc * cur, 1);
+    this.buffer = new arrayType(this.length);
   }
 
   public getBuffer(): T {
@@ -131,11 +130,10 @@ class Matrix<T extends ArrayBufferView> {
   }
 
   private validateArgumentsLength(args: number[]): void {
-    if (args.length < this.dimensions.length) {
-      throw new RangeError("Too few arguments provided to the function");
-    }
-    if (args.length > this.dimensions.length) {
-      throw new RangeError("Too many arguments provided to the function");
+    if (args.length !== this.dimensions.length) {
+      throw new RangeError(
+        `The matrix has ${this.dimensions.length} coordinates dimensions`
+      );
     }
   }
 
@@ -154,11 +152,16 @@ class Matrix<T extends ArrayBufferView> {
       yield this.buffer[i];
     }
   }
+
+  [Symbol.iterator]() {
+    return this.values();
+  }
 }
 
 const matrix = new Matrix(Int32Array, 2, 3, 3);
 
 console.log(matrix.getBuffer());
+
 console.log(matrix.set(1, 2, 2, 6));
 console.log(matrix.set(1, 2, 1, 5));
 console.log(matrix.set(1, 2, 0, 4));
@@ -170,6 +173,6 @@ console.log(matrix.getBuffer());
 
 let j = matrix.values();
 
-for (let i = 0; i < matrix.length; i++) {
-  console.log(j.next());
+for (let val of matrix) {
+  console.log(val);
 }
