@@ -1,6 +1,6 @@
 //  Doubly Linked List  (DLL)
 
-class ListNode<T> {
+class LinkedListNode<T> {
   public value: T;
   public next: ListNode<T> | null = null;
   public prev: ListNode<T> | null = null;
@@ -34,9 +34,9 @@ class ListNode<T> {
   }
 }
 
-class LinkedList<T> {
-  private head: ListNode<T> | null = null;
-  private tail: ListNode<T> | null = null;
+class DoublyLinkedList<T> {
+  private head: LinkedListNode<T> | null = null;
+  private tail: LinkedListNode<T> | null = null;
 
   private size: number;
 
@@ -76,7 +76,7 @@ class LinkedList<T> {
       // create a node,
       // and set it as a head and a tail of the Linked List,
       // increase list size by 1
-      let tmp = new ListNode<T>(value, {});
+      let tmp = new LinkedListNode<T>(value, {});
       this.head = tmp;
       this.tail = tmp;
       this.size++;
@@ -84,7 +84,7 @@ class LinkedList<T> {
       // if list is not empty: create a node,
       // pass it { next: this.head }
       // set it as this.head
-      let tmp = new ListNode<T>(value, { next: this.head });
+      let tmp = new LinkedListNode<T>(value, { next: this.head });
       this.head = tmp;
       this.size++;
     }
@@ -94,12 +94,38 @@ class LinkedList<T> {
     if (this.isEmpty()) {
       this.addToHead(value);
     } else {
-      let tmp = new ListNode<T>(value, { prev: this.tail });
-
-      this.tail!.next = tmp;
+      let tmp = new LinkedListNode<T>(value, { prev: this.tail });
       this.tail = tmp;
       this.size++;
     }
+  }
+
+  public removeHead() {
+    const { head } = this;
+
+    if (head == null || head === this.tail) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.head = head.next;
+      this.head!.prev = null;
+    }
+
+    return head?.value;
+  }
+
+  public removeTail() {
+    const { tail } = this;
+
+    if (tail == null || tail === this.head) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.tail = tail.prev;
+      this.tail!.next = null;
+    }
+
+    return tail?.value;
   }
 
   display(): void {
@@ -132,13 +158,9 @@ class LinkedList<T> {
   }
 }
 
-const DLL = new LinkedList<number>();
+const DLL = new DoublyLinkedList<number>();
 
 DLL.addToTail(1);
 DLL.addToTail(2);
 DLL.addToTail(3);
 DLL.addToTail(4);
-
-for (const value of DLL) {
-  console.log("value:", value);
-}

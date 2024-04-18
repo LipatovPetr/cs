@@ -15,6 +15,40 @@ type QueueTypes =
 
 type TypedArray<T> = new (capacity: number) => T;
 
+class ListNode<T> {
+  public value: T;
+  public next: ListNode<T> | null = null;
+  public prev: ListNode<T> | null = null;
+
+  constructor(
+    value: T,
+    {
+      next = null,
+      prev = null,
+    }: { prev?: ListNode<T> | null; next?: ListNode<T> | null }
+  ) {
+    this.value = value;
+
+    // if prev is passed then
+    // it is set as this.prev
+    // but also prev.next is set to THIS node
+
+    if (prev !== null) {
+      this.prev = prev;
+      prev.next = this;
+    }
+
+    // if next is passed then
+    // it is set as this.next
+    // but also next.prev is set to THIS node
+
+    if (next !== null) {
+      this.next = next;
+      next.prev = this;
+    }
+  }
+}
+
 // class LinkedList<T> {
 //   first: ListNode<T> | null = null;
 //   last: ListNode<T> | null = null;
